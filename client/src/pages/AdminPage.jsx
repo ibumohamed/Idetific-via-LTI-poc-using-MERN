@@ -16,11 +16,13 @@ const AdminPage = () => {
       const openidConfig = encodeURIComponent(
         `${backendUrl}/.well-known/openid-configuration`
       );
+      // const url = `http://localhost/lti/cartridge?openid_configuration=${openidConfig}&registration_token=${data.token}`;
       const url = `https://api.identific.com/lti/cartridge?openid_configuration=${openidConfig}&registration_token=${data.token}`;
       
       setIframeSrc(url);
       setStatus("Loading registration form...");
     } catch (err) {
+      console.log(err);
       setStatus("Error starting registration");
     }
   };

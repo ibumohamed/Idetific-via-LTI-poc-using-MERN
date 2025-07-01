@@ -37,6 +37,8 @@ export const openidConfig = (req, res) => {
     token_endpoint: `${backendUrl}/lti/token`,
     jwks_uri: `${backendUrl}/.well-known/jwks.json`,
     registration_endpoint: `${backendUrl}/lti/register`,
+    authorization_endpoint: `${backendUrl}/mod/lti/auth.php`,
+    authorization_server: null,
     response_types_supported: ["id_token"],
     id_token_signing_alg_values_supported: [alg],
     scopes_supported: ["openid"],
@@ -101,38 +103,25 @@ export const handleRegistration = async (req, res) => {
         .json({ error: "Missing required registration fields" });
     }
 
-    // Step 5: Check if this tool already exists (by login_uri or client_name)
-    let tool = await LtiTool.findOne({ initiate_login_uri });
+    let client_id = crypto.randomBytes(12).toString("base64"); // always new, DO NOT REUSE OLD ONE
+    let deployment_id = 1; // static 1 for temporarily
 
-    const client_id = tool?.client_id || payload?.sub;
-    const deployment_id = tool?.deployment_id || "1"; // static 1 for temporarily
+    //always create new LTI tool to prevent atuhentication issues
+    let tool = new LtiTool({
+      client_id,
+      jwks_uri,
+      redirect_uris,
+      client_name,
+      initiate_login_uri,
+      deployment_id,
+      tool_url: ltiConfig.target_link_uri,
+      domain: ltiConfig.domain,
+    });
 
-    if (tool) {
-      // Update existing tool
-      tool.set({
-        jwks_uri,
-        redirect_uris,
-        client_name,
-        initiate_login_uri,
-        deployment_id,
-        tool_url: ltiConfig.target_link_uri,
-        domain: ltiConfig.domain,
-      });
-    } else {
-      // Create new tool
-      tool = new LtiTool({
-        client_id,
-        jwks_uri,
-        redirect_uris,
-        client_name,
-        initiate_login_uri,
-        deployment_id,
-        tool_url: ltiConfig.target_link_uri,
-        domain: ltiConfig.domain,
-      });
-    }
 
     await tool.save();
+
+    console.log("LTI Tool registered:", tool, client_id); // Save Client ID for user iframe load (in getLtiTools())
 
     // Step 6: Return registration response like Moodle
     res.set({
@@ -196,6 +185,7 @@ export const getIdToken = async (req, res) => {
     given_name: "Admin",
     family_name: "User",
     name: "Admin User",
+    email: "user@camu.com",
 
     "https://purl.imsglobal.org/spec/lti/claim/ext": {
       user_username: "user1",
@@ -249,7 +239,7 @@ export const getIdToken = async (req, res) => {
 
 export const getLtiTools = async (req, res) => {
   try {
-    const tools = await LtiTool.find({});
+    const tools = await LtiTool.find({client_id: 'ONVgJpX5Rrpe0NB1'}); //Add client ID from registration
     return res.status(200).json({
       data: tools,
     });

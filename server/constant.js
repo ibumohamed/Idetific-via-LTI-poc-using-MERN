@@ -39,8 +39,8 @@ LwIDAQAB
 
 export const alg = "RS256"
 
-export const fontEndUrl ='http://localhost:3000'
-export const backendUrl ='http://localhost:5000'
+export const fontEndUrl ='https://pcrgnwxb-3000.use2.devtunnels.ms'
+export const backendUrl ='https://pcrgnwxb-5000.use2.devtunnels.ms'
 export const mongoDbConnectionUrl =''
 
 

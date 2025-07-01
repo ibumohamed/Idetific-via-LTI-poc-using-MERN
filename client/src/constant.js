@@ -1,2 +1,2 @@
 
-export const backendUrl ='http://localhost:5000'
+export const backendUrl ='https://pcrgnwxb-5000.use2.devtunnels.ms'
