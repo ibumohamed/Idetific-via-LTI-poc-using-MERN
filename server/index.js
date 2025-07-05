@@ -36,7 +36,7 @@ app.get("/.well-known/jwks.json", getJWKS);
 app.get("/.well-known/openid-configuration", openidConfig);
 app.post("/lti/register", handleRegistration);
 app.get("/lti/generate-token", generateRegistrationToken);
-app.post("/mod/lti/auth.php", getIdToken);
+app.post("/mod/lti/auth.php", getIdToken); // you can change this to "/lti/auth" no need for PHP as this is node.js, remember to change in JSON for openConfig in "authorization_endpoint"
 app.get("/api/lti-tools",getLtiTools );
 
 
